@@ -79,7 +79,7 @@ class TestMathProperties(unittest.TestCase):
         self.assertTrue(lehmannTest(11, 256))
         self.assertTrue(lehmannTest(1299541, 256))
 
-        
+
         self.assertFalse(lehmannTest(488881, 256))
 
 
