@@ -32,6 +32,16 @@ def modinv(a, m):
     else:
         return x % m
 
+def exp_mod(x,n,m):
+    if n == 0:
+        return 1
+    elif n == 1:
+        return x % m
+    elif n%2 == 0:
+        return (exp_mod(x,n/2,m)**2) % m
+    elif n%2 != 0:
+        return (x * exp_mod(x, (n-1)/2 ,m)**2) % m
+
 class TestMathProperties(unittest.TestCase):
     def setUp(self):
         pass
