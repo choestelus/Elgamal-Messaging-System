@@ -2,22 +2,22 @@ import unittest
 
 def testgen(total_num):
     return len(total_num) == len(set(total_num))
- 
-def test_z(generator_num, n):
-    bag = []
-    for i in range(1, n):
-        t = pow(generator_num, i, n)
-        bag.append(t)
-        return testgen(bag)
- 
-def generator(num):
+
+def isGenerator(generator_num, mod_num):
+    modulus_list = []
+    for i in range(1, mod_num):
+        t = pow(generator_num, i, mod_num)
+        modulus_list.append(t)
+    return testgen(modulus_list)
+
+def generatorList(num):
     generator_list = []
     for i in range(1,num - 1):
-        if test_z(i, num) == True:
+        if isGenerator(i, num) == True:
             generator_list.append(i)
-        print i, test_z(i, num)
+        print i, isGenerator(i, num)
     return generator_list
- 
+
 def egcd(a, b):
     if a == 0:
         return (b, 0, 1)
@@ -33,13 +33,15 @@ def modinv(a, m):
         return x % m
 
 class TestMathProperties(unittest.TestCase):
-
     def setUp(self):
         pass
 
-    def test_test_z(self):
-        self.assertTrue(test_z(2, 11))
-        self.assertFalse(test_z(3, 11))
+    def test_isGenerator(self):
+        self.assertTrue(isGenerator(2,11))
+        self.assertFalse(isGenerator(3,11))
 
 if __name__ == '__main__':
     unittest.main()
+    print isGenerator(3,11)
+    print isGenerator(2,11)
+
