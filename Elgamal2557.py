@@ -3,7 +3,7 @@ import os
 import binascii
 import random
 
-def testgen(total_num):
+def isSet(total_num):
     return len(total_num) == len(set(total_num))
 
 def isGenerator(generator_num, mod_num):
@@ -11,7 +11,7 @@ def isGenerator(generator_num, mod_num):
     for i in range(1, mod_num):
         t = pow(generator_num, i, mod_num)
         modulus_list.append(t)
-    return testgen(modulus_list)
+    return isSet(modulus_list)
 
 def generatorList(num):
     generator_list = []
@@ -28,7 +28,7 @@ def egcd(n1, n2):
             break
         tmp_a2, tmp_b2 = a1-a2*q, b1-b2*q
         n1,n2, a1,b1, a2,b2 = n2,r, a2,b2, tmp_a2,tmp_b2
-    gcd = n2 
+    gcd = n2
     return gcd, a2, b2
 
 def modinv(a, m):
@@ -81,7 +81,6 @@ class TestMathProperties(unittest.TestCase):
         self.assertTrue(lehmannTest(11, 256))
         self.assertTrue(lehmannTest(11, 256))
         self.assertTrue(lehmannTest(1299541, 256))
-
 
         self.assertFalse(lehmannTest(488881, 256))
 
