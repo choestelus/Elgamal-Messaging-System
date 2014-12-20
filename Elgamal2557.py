@@ -2,6 +2,8 @@ import unittest
 import os
 import binascii
 import random
+import math
+from bitstring import BitArray, BitStream
 
 def testgen(total_num):
     return len(total_num) == len(set(total_num))
@@ -65,6 +67,59 @@ def lehmannTest(test_number, test_count):
     else:
         return True
 
+def random_generator(p):
+	while True:
+	    g = random.SystemRandom().randint(1,p-1)
+	    if g != 1%p and g != (-1)%p:
+	    	if exp_mod(g, (p-1)/2, p) != 1:
+	    		return g
+
+def gen_key(p):
+	g = random_generator(p)
+	u = random.SystemRandom().randint(1, p-1)
+	y = exp_mod(g,u,p) #private key
+	return [(p,g,y),u]
+
+def encrypt(plaintext, pub_key):
+    print pub_key
+    p = pub_key[0]
+    g = pub_key[1]
+    y = pub_key[2]
+    block_size = math.floor(math.log(23,2))
+    bstream = BitStream()
+    for c in plaintext:
+        bstream.append("0x" + c.encode("hex"))
+    while True:
+        k = random.SystemRandom().randint(1, p-1)
+        if egcd(k,p-1)[0] == 1:
+            break
+    #have to add padding to plaintext
+    ciphertext = []
+    while(bstream.pos < bstream.len):
+        x = bstream.read(4).uint
+        a = exp_mod(g, k, p)
+        b = (exp_mod(y,k, p)*x) % p
+        ciphertext.append((a,b))
+
+    print ciphertext
+    return ciphertext
+
+def decrypt(ciphertext, key):
+    bstream = BitStream()
+    plaintext = ""
+    for block in ciphertext:
+        p, g, y = key[0]
+        u = key[1]
+        a_pow_u = exp_mod(block[0], u, p)
+        inv_a_pow_u = modinv(a_pow_u, p)
+        x = (block[1] * inv_a_pow_u) % p
+        bstream.append('0x' + str(hex(x)))
+
+    while(bstream.pos < bstream.len):
+        plaintext += chr(bstream.read(8).uint)
+
+    return plaintext
+
 class TestMathProperties(unittest.TestCase):
     def setUp(self):
         pass
@@ -86,7 +141,12 @@ class TestMathProperties(unittest.TestCase):
         self.assertFalse(lehmannTest(488881, 256))
 
 if __name__ == '__main__':
-    #print "generator", random.SystemRandom().sample(generatorList(23), 1)[0]
+    print "generator", random.SystemRandom().sample(generatorList(23), 1)[0]
     unittest.main()
     print isGenerator(3,11)
     print isGenerator(2,11)
+    #key = gen_key(23) 
+    #ciphertext = encrypt("Hello, world", key[0])
+    #plaintext = decrypt(ciphertext, key)
+    #print plaintext
+
