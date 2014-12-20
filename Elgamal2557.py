@@ -1,3 +1,5 @@
+import unittest
+
 def testgen(total_num):
     return len(total_num) == len(set(total_num))
  
@@ -29,3 +31,15 @@ def modinv(a, m):
         raise Exception('modular inverse does not exist')
     else:
         return x % m
+
+class TestMathProperties(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_test_z(self):
+        self.assertTrue(test_z(2, 11))
+        self.assertFalse(test_z(3, 11))
+
+if __name__ == '__main__':
+    unittest.main()
