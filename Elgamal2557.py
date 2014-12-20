@@ -18,12 +18,17 @@ def generatorList(num):
         print i, isGenerator(i, num)
     return generator_list
 
-def egcd(a, b):
-    if a == 0:
-        return (b, 0, 1)
-    else:
-        g, y, x = egcd(b % a, a)
-        return (g, x - (b // a) * y, y)
+
+def egcd(n1, n2):
+    a1, b1, a2, b2 = 1,0,0,1
+    while True:
+        r, q = n1%n2 , n1//n2
+        if(r==0):
+            break
+        tmp_a2, tmp_b2 = a1-a2*q, b1-b2*q
+        n1,n2, a1,b1, a2,b2 = n2,r, a2,b2, tmp_a2,tmp_b2
+    gcd = n2 
+    return gcd, a2, b2
 
 def modinv(a, m):
     g, x, y = egcd(a, m)
@@ -54,4 +59,3 @@ if __name__ == '__main__':
     unittest.main()
     print isGenerator(3,11)
     print isGenerator(2,11)
-
