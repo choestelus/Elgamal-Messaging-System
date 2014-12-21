@@ -68,17 +68,17 @@ def lehmannTest(test_number, test_count):
         return True
 
 def random_generator(p):
-	while True:
-	    g = random.SystemRandom().randint(1,p-1)
-	    if g != 1%p and g != (-1)%p:
-	    	if exp_mod(g, (p-1)/2, p) != 1:
-	    		return g
+    while True:
+        g = random.SystemRandom().randint(1,p-1)
+            if g != 1%p and g != (-1)%p:
+                if exp_mod(g, (p-1)/2, p) != 1:
+                    return g
 
 def gen_key(p):
-	g = random_generator(p)
-	u = random.SystemRandom().randint(1, p-1)
-	y = exp_mod(g,u,p) #private key
-	return [(p,g,y),u]
+    g = random_generator(p)
+        u = random.SystemRandom().randint(1, p-1)
+        y = exp_mod(g,u,p) #private key
+        return [(p,g,y),u]
 
 def encrypt(plaintext, pub_key):
     print pub_key
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     unittest.main()
     print isGenerator(3,11)
     print isGenerator(2,11)
-    #key = gen_key(23) 
+    #key = gen_key(23)
     #ciphertext = encrypt("Hello, world", key[0])
     #plaintext = decrypt(ciphertext, key)
     #print plaintext
