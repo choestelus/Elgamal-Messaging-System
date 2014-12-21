@@ -19,6 +19,30 @@ class TestMathProperties(unittest.TestCase):
 
         self.assertFalse(lehmannTest(488881, 256))
 
+    def test_string_encrypt(self):
+        key = gen_key(1024)
+        self.assertEqual(decrypt_string(encrypt_string("hello, world.", key[0]), key), "hello, world.")
+
+    def test_file_encrypt(self):
+        key = gen_key(256)
+        message = BitStream(filename="test.txt")
+        ciphertext = encrypt(message, key[0])
+        print "message", len(message), message
+        print ciphertext
+        decrypt_text = decrypt(ciphertext, key)
+        print "decrypt_text", len(decrypt_text), decrypt_text
+        self.assertEqual(decrypt_text, message[:message.len])
+
+    def test_signature(self):
+        message = 3
+        key = gen_key(5)
+        signature = elgamal_sign(3,key)
+        print signature
+        self.assertTrue(verify(message, signature, key[0]))
+
+    def test_hash(self):
+        self.assertEqual(AHash(3, 7, BitStream("0b1010101010101010111111")),6)
+
 if __name__ == '__main__':
     unittest.main()
 
