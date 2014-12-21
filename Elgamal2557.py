@@ -86,7 +86,7 @@ def gen_key(bit_length):
         if(lehmannTest(p,256)):
             break
     g = random_generator(p)
-    u = random.SystemRandom().randint(2**(bit_length-1), (2**bit_length)-1)
+    u = random.SystemRandom().randint(2**(bit_length-1), p-1)
     y = mod_exp(g,u,p) #private key
     return [(p,g,y),u]
 
@@ -97,10 +97,10 @@ def encrypt(bstream, pub_key):
     ciphertext = [0]
 
     block_size = int(math.floor(math.log(p,2)))
+    ciphertext[0] = bstream.len
     if bstream.len % block_size != 0:
         padding_size = block_size - bstream.len%block_size
         bstream.append('0b' + '0'*(padding_size))
-        ciphertext[0] = padding_size
     while True:
         k = random.SystemRandom().randint(1, p-1)
         if egcd(k,p-1)[0] == 1:
@@ -125,7 +125,7 @@ def decrypt(ciphertext, key):
         block_size = math.floor(math.log(p,2))
         bstream.append('0b' + bin(x)[2:].zfill(int(block_size)))
 
-    return bstream[:bstream.len-ciphertext[0]]
+    return bstream[0:ciphertext[0]]
 
 def encrypt_string(plaintext, pub_key):
     bstream = BitStream()
@@ -139,3 +139,39 @@ def decrypt_string(ciphertext, key):
     while(cipher_bit_stream.pos < cipher_bit_stream.len):
         plaintext += chr(cipher_bit_stream.read(8).uint)
     return plaintext
+
+def elgamal_sign(message, key):
+    #p = key[0][0]
+    #g = key[0][1]
+    #y = key[0][2]
+    #x = key[1]
+
+    p = 23
+    g = 7
+    x = 14
+    y = g**x % p
+
+    print p,g,y,x ,"key"
+    while(True):
+        k = random.SystemRandom().randint(1,p-1)
+        if egcd(k,p-1)[0] == 1:
+            break
+    print k,"k"
+
+    r = mod_exp(g,k,p)
+    s = (modinv(k,p-1)*(message-x*r)) % p-1
+
+    print (r,s), "signature1"
+    return (r,s)
+
+def verify(message,signature,pub_key):
+    print signature, "signature"
+    p = pub_key[0]
+    g = pub_key[1]
+    y = pub_key[2]
+
+    r = signature[0]
+    s = signature[1]
+    print g**message % p, "g^x"
+    print (y**r)*(r**s) % p, "y**r, r**s"
+    return g**message == (y**r)*(r**s)

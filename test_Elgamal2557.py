@@ -23,6 +23,10 @@ class TestMathProperties(unittest.TestCase):
         key = gen_key(1024)
         self.assertEqual(decrypt_string(encrypt_string("hello, world.", key[0]), key), "hello, world.")
 
+    def test_signature(self):
+        key = gen_key(5)
+        self.assertTrue(verify(3,elgamal_sign(3,key),key[0]))
+
 if __name__ == '__main__':
     unittest.main()
 
