@@ -120,3 +120,19 @@ def decrypt(ciphertext, key):
 
     return plaintext
 
+def byte_to_binary(n):
+    return ''.join(str((n & (1 << i)) and 1) for i in reversed(range(8)))
+
+def hex_to_binary(h):
+    return ''.join(byte_to_binary(ord(b)) for b in binascii.unhexlify(h))
+
+def AHash(k,p,bstream):
+    block = []
+    block_size = (k-1)*math.floor(math.log(p,2))
+    if bstream.len % block_size != 0:
+        for x in range(0, bstream.len - block_size):
+            bstream += 0
+    for i in range(0, bstream.len/block_size):
+        block[i] = bstream[block_size*i : block_size]
+
+    
