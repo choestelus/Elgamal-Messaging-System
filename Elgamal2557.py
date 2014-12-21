@@ -1,9 +1,10 @@
 import unittest
+import sys
 import os
 import binascii
 import random
 import math
-from bitstring import BitArray, BitStream
+from bitstring import BitArray, BitStream, Bits
 
 def isSet(total_num):
     return len(total_num) == len(set(total_num))
@@ -101,13 +102,18 @@ def encrypt(bstream, pub_key):
     #if bstream.len % block_size != 0:
     #    padding_size = block_size - bstream.len%block_size
     #    bstream.append('0b' + '0'*(padding_size))
+    print "before random"
     while True:
         k = random.SystemRandom().randint(1, p-1)
         if egcd(k,p-1)[0] == 1:
             break
+    print "post random"
     #have to add padding to plaintext
+
+    print "pre encrypt"
     while(bstream.pos < bstream.len):
         try:
+            #sys.stdout.write(".")
             x = bstream.read(block_size).uint
         except:
             padding_size = block_size - bstream.len%block_size
@@ -116,12 +122,16 @@ def encrypt(bstream, pub_key):
         a = mod_exp(g, k, p)
         b = (mod_exp(y,k, p)*x) % p
         ciphertext.append((a,b))
+    print ""
+    print "post encrypt"
 
     return ciphertext
 
 def decrypt(ciphertext, key):
     bstream = BitStream()
+    print "pre decrypt"
     for block in ciphertext[1:]:
+        #sys.stdout.write(".")
         p, g, y = key[0]
         u = key[1]
         a_pow_u = mod_exp(block[0], u, p)
@@ -129,6 +139,8 @@ def decrypt(ciphertext, key):
         x = (block[1] * inv_a_pow_u) % p
         block_size = math.floor(math.log(p,2))
         bstream.append('0b' + bin(x)[2:].zfill(int(block_size)))
+    print ""
+    print "post decrypt"
 
     return bstream.read(ciphertext[0])
 
@@ -161,6 +173,40 @@ def elgamal_sign(message, key):
 
     return (r,s)
 
+def AHash(k,p,bstream):
+    #block = []
+    print (k-1), "k-1"
+    print math.floor(math.log(p,2)), "math.floor(math.log(p,2))"
+    block_size = int((k-1)*math.floor(math.log(p,2)))
+    print block_size
+    n_block = int(math.ceil(bstream.len/float(block_size)))
+    message_size = block_size * n_block
+    b0 = message_size
+    for i in range(1,n_block+1):
+        try:
+            b0 = roundHash(k, p, BitStream(bstream.read(block_size)), b0)
+        except:
+            print bstream.len%block_size
+            padding_size = block_size - bstream.len%block_size
+            print "###", padding_size , "\n"
+            b0 = roundHash(k, p,
+                BitStream("0b" + bstream.read(bstream.len - bstream.pos).bin + "0" * padding_size),
+                b0)
+
+        if(i != n_block):
+            tmp_b0 = BitArray("uint:" + str(int(math.ceil(math.log(p,2)))) + "=" + str(b0))
+            tmp_b0.ror(int(math.ceil(math.log(p,2))//2))
+            b0 = tmp_b0.uint
+
+    return b0
+
+def roundHash(k,p,bstream,b0):
+    block_size = int(math.floor(math.log(p,2)))
+    result = b0
+    while(bstream.pos < bstream.len):
+        result = (result + bstream.read(block_size).uint) % p
+    return result
+
 def verify(message,signature,pub_key):
     p = pub_key[0]
     g = pub_key[1]
@@ -175,3 +221,4 @@ if __name__ == '__main__':
     message = BitStream(filename="requirements.md")
     ciphertext = encrypt(message, key[0])
     decrypt_text = decrypt(ciphertext, key)
+
