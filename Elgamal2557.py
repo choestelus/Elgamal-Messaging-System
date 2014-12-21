@@ -171,7 +171,7 @@ def verify(message,signature,pub_key):
     return mod_exp(g,message,p) == mod_exp(y,r,p)*mod_exp(r,s,p) % p
 
 if __name__ == '__main__':
-    key = gen_key(1024)
+    key = gen_key(256)
     message = BitStream(filename="requirements.md")
     ciphertext = encrypt(message, key[0])
     decrypt_text = decrypt(ciphertext, key)
