@@ -23,6 +23,18 @@ class TestMathProperties(unittest.TestCase):
         key = gen_key(1024)
         self.assertEqual(decrypt_string(encrypt_string("hello, world.", key[0]), key), "hello, world.")
 
+    def test_file_encrypt(self):
+        key = gen_key(1024)
+        message = BitStream(filename="test.txt")
+        ciphertext = encrypt(message, key[0])
+        print "message", len(message), message
+        print ciphertext
+        decrypt_text = decrypt(ciphertext, key)
+        print "decrypt_text", len(decrypt_text), decrypt_text
+        self.assertEqual(decrypt_text, message)
+
+
+
 if __name__ == '__main__':
     unittest.main()
 

@@ -97,10 +97,10 @@ def encrypt(bstream, pub_key):
     ciphertext = [0]
 
     block_size = int(math.floor(math.log(p,2)))
+    ciphertext[0] = bstream.len
     if bstream.len % block_size != 0:
         padding_size = block_size - bstream.len%block_size
         bstream.append('0b' + '0'*(padding_size))
-        ciphertext[0] = padding_size
     while True:
         k = random.SystemRandom().randint(1, p-1)
         if egcd(k,p-1)[0] == 1:
@@ -125,7 +125,7 @@ def decrypt(ciphertext, key):
         block_size = math.floor(math.log(p,2))
         bstream.append('0b' + bin(x)[2:].zfill(int(block_size)))
 
-    return bstream[:bstream.len-ciphertext[0]]
+    return bstream.read(ciphertext[0])
 
 def encrypt_string(plaintext, pub_key):
     bstream = BitStream()
@@ -139,3 +139,13 @@ def decrypt_string(ciphertext, key):
     while(cipher_bit_stream.pos < cipher_bit_stream.len):
         plaintext += chr(cipher_bit_stream.read(8).uint)
     return plaintext
+
+if __name__ == '__main__':
+    key = gen_key(1024)
+    message = BitStream(filename="requirements.md")
+    ciphertext = encrypt(message, key[0])
+    print "message", len(message)
+    decrypt_text = decrypt(ciphertext, key)
+    print "decrypt_text", len(decrypt_text)
+    print decrypt_text == message
+
