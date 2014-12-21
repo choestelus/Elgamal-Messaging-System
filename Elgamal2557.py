@@ -70,15 +70,15 @@ def lehmannTest(test_number, test_count):
 def random_generator(p):
     while True:
         g = random.SystemRandom().randint(1,p-1)
-            if g != 1%p and g != (-1)%p:
-                if exp_mod(g, (p-1)/2, p) != 1:
-                    return g
+        if g != 1%p and g != (-1)%p:
+            if exp_mod(g, (p-1)/2, p) != 1:
+                return g
 
 def gen_key(p):
     g = random_generator(p)
-        u = random.SystemRandom().randint(1, p-1)
-        y = exp_mod(g,u,p) #private key
-        return [(p,g,y),u]
+    u = random.SystemRandom().randint(1, p-1)
+    y = exp_mod(g,u,p) #private key
+    return [(p,g,y),u]
 
 def encrypt(plaintext, pub_key):
     print pub_key
@@ -119,33 +119,4 @@ def decrypt(ciphertext, key):
         plaintext += chr(bstream.read(8).uint)
 
     return plaintext
-
-class TestMathProperties(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def test_isGenerator(self):
-        self.assertTrue(isGenerator(2,11))
-        self.assertFalse(isGenerator(3,11))
-
-    def test_lehmannTest(self):
-        self.assertTrue(lehmannTest(2, 256))
-        self.assertTrue(lehmannTest(3, 256))
-        self.assertTrue(lehmannTest(5, 256))
-        self.assertTrue(lehmannTest(7, 256))
-        self.assertTrue(lehmannTest(11, 256))
-        self.assertTrue(lehmannTest(11, 256))
-        self.assertTrue(lehmannTest(1299541, 256))
-
-        self.assertFalse(lehmannTest(488881, 256))
-
-if __name__ == '__main__':
-    print "generator", random.SystemRandom().sample(generatorList(23), 1)[0]
-    unittest.main()
-    print isGenerator(3,11)
-    print isGenerator(2,11)
-    #key = gen_key(23)
-    #ciphertext = encrypt("Hello, world", key[0])
-    #plaintext = decrypt(ciphertext, key)
-    #print plaintext
 
