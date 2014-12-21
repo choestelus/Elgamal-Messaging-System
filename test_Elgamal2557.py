@@ -33,9 +33,12 @@ class TestMathProperties(unittest.TestCase):
         print "decrypt_text", len(decrypt_text), decrypt_text
         self.assertEqual(decrypt_text, message[:message.len])
 
-    """def test_signature(self):
+    def test_signature(self):
+        message = 3
         key = gen_key(5)
-        self.assertTrue(verify(3,elgamal_sign(3,key),key[0]));"""
+        signature = elgamal_sign(3,key)
+        print signature
+        self.assertTrue(verify(message, signature, key[0]))
 
 if __name__ == '__main__':
     unittest.main()

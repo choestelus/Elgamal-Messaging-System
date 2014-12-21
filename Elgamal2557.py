@@ -146,46 +146,32 @@ def decrypt_string(ciphertext, key):
     return plaintext
 
 def elgamal_sign(message, key):
-    #p = key[0][0]
-    #g = key[0][1]
-    #y = key[0][2]
-    #x = key[1]
+    p = key[0][0]
+    g = key[0][1]
+    y = key[0][2]
+    x = key[1]
 
-    p = 23
-    g = 7
-    x = 14
-    y = g**x % p
-
-    print p,g,y,x ,"key"
     while(True):
         k = random.SystemRandom().randint(1,p-1)
         if egcd(k,p-1)[0] == 1:
             break
-    print k,"k"
 
     r = mod_exp(g,k,p)
-    s = (modinv(k,p-1)*(message-x*r)) % p-1
+    s = (modinv(k,p-1) * (message-x*r)) % (p-1)
 
-    print (r,s), "signature1"
     return (r,s)
 
 def verify(message,signature,pub_key):
-    print signature, "signature"
     p = pub_key[0]
     g = pub_key[1]
     y = pub_key[2]
 
     r = signature[0]
     s = signature[1]
-    print g**message % p, "g^x"
-    print (y**r)*(r**s) % p, "y**r, r**s"
-    return g**message == (y**r)*(r**s)
+    return mod_exp(g,message,p) == mod_exp(y,r,p)*mod_exp(r,s,p) % p
 
 if __name__ == '__main__':
     key = gen_key(1024)
     message = BitStream(filename="requirements.md")
     ciphertext = encrypt(message, key[0])
-    print "message", len(message)
     decrypt_text = decrypt(ciphertext, key)
-    print "decrypt_text", len(decrypt_text)
-    print decrypt_text == message
