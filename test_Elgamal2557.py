@@ -19,6 +19,10 @@ class TestMathProperties(unittest.TestCase):
 
         self.assertFalse(lehmannTest(488881, 256))
 
+    def test_string_encrypt(self):
+        key = gen_key(1024)
+        self.assertEqual(decrypt_string(encrypt_string("hello, world.", key[0]), key), "hello, world.")
+
 if __name__ == '__main__':
     unittest.main()
 

@@ -40,15 +40,21 @@ def modinv(a, m):
     else:
         return x % m
 
-def exp_mod(x,n,m):
-    if n == 0:
-        return 1
-    elif n == 1:
-        return x % m
-    elif n%2 == 0:
-        return (exp_mod(x,n/2,m)**2) % m
-    elif n%2 != 0:
-        return (x * exp_mod(x, (n-1)/2 ,m)**2) % m
+def bits_of_n(n):
+    bits = []
+    while n:
+        bits.append(n % 2)
+        n /= 2
+
+    return bits
+
+def mod_exp(x,n,m):
+    result=1
+    for bit in reversed(bits_of_n(n)):
+        result = result * result % m
+        if bit == 1:
+            result = result * x % m
+    return result
 
 def getRandomBits(n):
     #n = int(binascii.hexlify(os.urandom(n)), 16)
@@ -71,52 +77,65 @@ def random_generator(p):
     while True:
         g = random.SystemRandom().randint(1,p-1)
         if g != 1%p and g != (-1)%p:
-            if exp_mod(g, (p-1)/2, p) != 1:
+            if mod_exp(g, (p-1)/2, p) != 1:
                 return g
 
-def gen_key(p):
+def gen_key(bit_length):
+    while(True):
+        p = random.SystemRandom().randint(2**(bit_length-1), (2**bit_length)-1)
+        if(lehmannTest(p,256)):
+            break
     g = random_generator(p)
-    u = random.SystemRandom().randint(1, p-1)
-    y = exp_mod(g,u,p) #private key
+    u = random.SystemRandom().randint(2**(bit_length-1), (2**bit_length)-1)
+    y = mod_exp(g,u,p) #private key
     return [(p,g,y),u]
 
-def encrypt(plaintext, pub_key):
-    print pub_key
+def encrypt(bstream, pub_key):
     p = pub_key[0]
     g = pub_key[1]
     y = pub_key[2]
-    block_size = math.floor(math.log(23,2))
-    bstream = BitStream()
-    for c in plaintext:
-        bstream.append("0x" + c.encode("hex"))
+    ciphertext = [0]
+
+    block_size = int(math.floor(math.log(p,2)))
+    if bstream.len % block_size != 0:
+        padding_size = block_size - bstream.len%block_size
+        bstream.append('0b' + '0'*(padding_size))
+        ciphertext[0] = padding_size
     while True:
         k = random.SystemRandom().randint(1, p-1)
         if egcd(k,p-1)[0] == 1:
             break
     #have to add padding to plaintext
-    ciphertext = []
     while(bstream.pos < bstream.len):
-        x = bstream.read(4).uint
-        a = exp_mod(g, k, p)
-        b = (exp_mod(y,k, p)*x) % p
+        x = bstream.read(block_size).uint
+        a = mod_exp(g, k, p)
+        b = (mod_exp(y,k, p)*x) % p
         ciphertext.append((a,b))
 
-    print ciphertext
     return ciphertext
 
 def decrypt(ciphertext, key):
     bstream = BitStream()
-    plaintext = ""
-    for block in ciphertext:
+    for block in ciphertext[1:]:
         p, g, y = key[0]
         u = key[1]
-        a_pow_u = exp_mod(block[0], u, p)
+        a_pow_u = mod_exp(block[0], u, p)
         inv_a_pow_u = modinv(a_pow_u, p)
         x = (block[1] * inv_a_pow_u) % p
-        bstream.append('0x' + str(hex(x)))
+        block_size = math.floor(math.log(p,2))
+        bstream.append('0b' + bin(x)[2:].zfill(int(block_size)))
 
-    while(bstream.pos < bstream.len):
-        plaintext += chr(bstream.read(8).uint)
+    return bstream[:bstream.len-ciphertext[0]]
 
+def encrypt_string(plaintext, pub_key):
+    bstream = BitStream()
+    for c in plaintext:
+        bstream.append("0x" + c.encode("hex"))
+    return encrypt(bstream, pub_key)
+
+def decrypt_string(ciphertext, key):
+    cipher_bit_stream = decrypt(ciphertext, key)
+    plaintext = ""
+    while(cipher_bit_stream.pos < cipher_bit_stream.len):
+        plaintext += chr(cipher_bit_stream.read(8).uint)
     return plaintext
-
