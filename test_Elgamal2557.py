@@ -38,13 +38,28 @@ class TestMathProperties(unittest.TestCase):
         #print "decrypt_text", len(decrypt_text), decrypt_text
         self.assertEqual(decrypt_text, message)
 
-    def test_signature(self):
-        print "test_signature"
-        message = 3
-        key = gen_key(5)
-        signature = elgamal_sign(3,key)
-        #print signature
-        self.assertTrue(verify(message, signature, key[0]))
+    def test_signature_string(self):
+        message = "digital signature testing"
+        key = gen_key(256)
+        digest = hash_string(200, key[0][0], message)
+        signature = elgamal_sign(digest,key)
+
+        self.assertTrue(verify(digest, signature, key[0]))
+
+    def test_sign_encrypt_file(self):
+        key = gen_key(256)
+
+        #encrypt and sign
+        message = BitStream(filename="test.pptx")
+        ciphertext = encrypt(message, key[0])
+        digest = AHash(100, key[0][0], message)
+        signature = elgamal_sign(digest, key)
+
+        #decrypt and verfiy
+        plaintext = decrypt(ciphertext, key)
+        reciever_digest = AHash(100, key[0][0], plaintext)
+        self.assertTrue(verify(reciever_digest, signature, key[0]))
+        self.assertTrue(message, plaintext)
 
     def test_hash(self):
         self.assertEqual(AHash(3, 7, BitStream("0b1010101010101010111111")),6)

@@ -75,6 +75,9 @@ def lehmannTest(test_number, test_count):
         return True
 
 def random_generator(p):
+    if p == 3:
+        return 2
+
     while True:
         g = random.SystemRandom().randint(1,p-1)
         if g != 1%p and g != (-1)%p:
@@ -103,6 +106,8 @@ def encrypt(bstream, pub_key):
     #    padding_size = block_size - bstream.len%block_size
     #    bstream.append('0b' + '0'*(padding_size))
     print "before random"
+    #reset bitstream position
+    bstream.pos = 0
     while True:
         k = random.SystemRandom().randint(1, p-1)
         if egcd(k,p-1)[0] == 1:
@@ -111,6 +116,8 @@ def encrypt(bstream, pub_key):
     #have to add padding to plaintext
 
     print "pre encrypt"
+    #trying to improve execution speed
+    #a = mod_exp(g, k, p)
     while(bstream.pos < bstream.len):
         try:
             #sys.stdout.write(".")
@@ -119,6 +126,7 @@ def encrypt(bstream, pub_key):
             padding_size = block_size - bstream.len%block_size
             x = BitStream("0b" + bstream.read(bstream.len - bstream.pos).bin + "0" * padding_size).uint
 
+        #trying to improve execution speed
         a = mod_exp(g, k, p)
         b = (mod_exp(y,k, p)*x) % p
         ciphertext.append((a,b))
@@ -130,10 +138,16 @@ def encrypt(bstream, pub_key):
 def decrypt(ciphertext, key):
     bstream = BitStream()
     print "pre decrypt"
+
+    p, g, y = key[0]
+    u = key[1]
+
+    #trying to improve execution speed
+    #a_pow_u = mod_exp(ciphertext[1][0], u, p)
+    #inv_a_pow_u = modinv(a_pow_u, p)
     for block in ciphertext[1:]:
         #sys.stdout.write(".")
-        p, g, y = key[0]
-        u = key[1]
+        #trying to improve execution speed
         a_pow_u = mod_exp(block[0], u, p)
         inv_a_pow_u = modinv(a_pow_u, p)
         x = (block[1] * inv_a_pow_u) % p
@@ -174,21 +188,18 @@ def elgamal_sign(message, key):
     return (r,s)
 
 def AHash(k,p,bstream):
-    #block = []
-    print (k-1), "k-1"
-    print math.floor(math.log(p,2)), "math.floor(math.log(p,2))"
     block_size = int((k-1)*math.floor(math.log(p,2)))
-    print block_size
     n_block = int(math.ceil(bstream.len/float(block_size)))
     message_size = block_size * n_block
     b0 = message_size
+
+    #reset bitstream position
+    bstream.pos = 0
     for i in range(1,n_block+1):
         try:
             b0 = roundHash(k, p, BitStream(bstream.read(block_size)), b0)
         except:
-            print bstream.len%block_size
             padding_size = block_size - bstream.len%block_size
-            print "###", padding_size , "\n"
             b0 = roundHash(k, p,
                 BitStream("0b" + bstream.read(bstream.len - bstream.pos).bin + "0" * padding_size),
                 b0)
@@ -205,7 +216,14 @@ def roundHash(k,p,bstream,b0):
     result = b0
     while(bstream.pos < bstream.len):
         result = (result + bstream.read(block_size).uint) % p
+
     return result
+
+def hash_string(k, p, plaintext):
+    bstream = BitStream()
+    for c in plaintext:
+        bstream.append("0x" + c.encode("hex"))
+    return AHash(k, p, bstream)
 
 def verify(message,signature,pub_key):
     p = pub_key[0]
@@ -218,7 +236,6 @@ def verify(message,signature,pub_key):
 
 if __name__ == '__main__':
     key = gen_key(256)
-    message = BitStream(filename="requirements.md")
+    """message = BitStream(filename="requirements.md")
     ciphertext = encrypt(message, key[0])
-    decrypt_text = decrypt(ciphertext, key)
-
+    decrypt_text = decrypt(ciphertext, key)"""
