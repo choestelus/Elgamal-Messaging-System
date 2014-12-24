@@ -60,9 +60,9 @@ def receiver_thread(arg1, stop_event):
 
                 if 's' in in_dict:
                     if 'f' in in_dict or 'fc' in in_dict:
-                        digest = AHash(int(k), receiver_key[0], BitStream(frecv))
+                        digest = AHash(int(in_dict['k']), receiver_key[0], BitStream(frecv))
                     else:
-                        digest = hash_string(int(k), receiver_key[0], plaintext)
+                        digest = hash_string(int(in_dict['k']), receiver_key[0], plaintext)
 
                     if verify(digest, in_dict['s'], receiver_key):
                         print "Verfiying Pass"
@@ -128,6 +128,7 @@ if __name__ == "__main__":
             if 's' in command:
                 digest = AHash(int(k), key[0][0], file_send)
                 message['s'] = elgamal_sign(digest, key)
+                message['k'] = k
 
             message['fname'] = input
             sending_str = pickle.dumps(message, -1)
@@ -148,6 +149,7 @@ if __name__ == "__main__":
                 digest = hash_string(int(k), key[0][0], input)
                 signature = elgamal_sign(digest, key)
                 message['s'] = signature
+                message['k'] = k
 
             print message,  "message"
 
