@@ -26,6 +26,8 @@ def receiver_thread(arg1, stop_event):
                 if not receiver_key:
                     receiver_key = pickle.loads(msg)
                     print receiver_key, "receiver_key"
+                    sys.stdout.write(">")
+                    sys.stdout.flush()
                     continue
 
                 in_dict = pickle.loads(msg)
@@ -33,10 +35,11 @@ def receiver_thread(arg1, stop_event):
                 if 'c' in in_dict:
                     plaintext = decrypt_string(in_dict['c'], key)
                     print "receive", plaintext
+                    sys.stdout.write(">")
+                    sys.stdout.flush()
 
                 elif 'f' in in_dict:
-                    print "receive file"
-                    print in_dict['f']
+                    print "receive file", in_dict['fname']
                     frecv = BitStream(in_dict['f'])
                     sys.stdout.write(">")
                     sys.stdout.flush()
@@ -45,7 +48,7 @@ def receiver_thread(arg1, stop_event):
                     f.close()
 
                 elif 'fc' in in_dict:
-                    print "receive encrypted file"
+                    print "receive encrypted file", in_dict['fname']
                     frecv = BitStream(decrypt(in_dict['fc'], key))
                     sys.stdout.write(">")
                     sys.stdout.flush()
@@ -57,6 +60,8 @@ def receiver_thread(arg1, stop_event):
                 if 'p' in in_dict:
                     plaintext = in_dict['p']
                     print "receive", plaintext 
+                    sys.stdout.write(">")
+                    sys.stdout.flush()
 
                 if 's' in in_dict:
                     if 'f' in in_dict or 'fc' in in_dict:
@@ -66,6 +71,8 @@ def receiver_thread(arg1, stop_event):
 
                     if verify(digest, in_dict['s'], receiver_key):
                         print "Verfiying Pass"
+                    else:
+                        print "Verifying fail"
 
                     sys.stdout.write(">")
                     sys.stdout.flush()
@@ -87,7 +94,7 @@ if __name__ == "__main__":
     #key generation
     n, k = sys.argv[1:]
     print n, k, "<- n k"
-    key = gen_key(10)
+    key = gen_key(int(n))
     pub_key_str = pickle.dumps(key[0])
     socket.send(pub_key_str)
 
@@ -136,9 +143,9 @@ if __name__ == "__main__":
         #for normal message
         else:
             if 'e' in command:
-                print receiver_key , " <- receiver key"
+                #print receiver_key , " <- receiver key"
                 ciphertext = encrypt_string(input, receiver_key)
-                print ciphertext, " <- cihpertext"
+                #print ciphertext, " <- cihpertext"
                 message['c'] = ciphertext
 
             #don't encrypt
@@ -150,7 +157,7 @@ if __name__ == "__main__":
                 message['s'] = elgamal_sign(digest, key)
                 message['k'] = k
 
-            print message,  "message"
+            #print message,  "message"
 
             sending_str = pickle.dumps(message)
 
