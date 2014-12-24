@@ -88,7 +88,7 @@ if __name__ == "__main__":
     context = zmq.Context()
     socket = context.socket(zmq.PAIR)
     socket.setsockopt(zmq.LINGER, 0)
-    socket.connect("tcp://161.246.5.28:%s" % port)
+    socket.connect("tcp://192.168.43.247:%s" % port)
 
     #key generation
     n, k = sys.argv[1:]
@@ -106,9 +106,6 @@ if __name__ == "__main__":
             input = input.split(" ", 1)[1]
         except AttributeError:
             command = ""
-
-        print input, "input"
-        print command, "command"
 
         if input == "$q":
             t_stop.set()
