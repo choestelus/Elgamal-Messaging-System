@@ -30,7 +30,7 @@ class TestMathProperties(unittest.TestCase):
     def test_file_encrypt(self):
         print "test_file_encrypt"
         key = gen_key(256)
-        message = BitStream(filename="test.pptx")
+        message = BitStream(filename="README.md")
         ciphertext = encrypt(message, key[0])
         #print "message", len(message), message
         #print ciphertext
@@ -50,7 +50,7 @@ class TestMathProperties(unittest.TestCase):
         key = gen_key(256)
 
         #encrypt and sign
-        message = BitStream(filename="test.pptx")
+        message = BitStream(filename="README.md")
         ciphertext = encrypt(message, key[0])
         digest = AHash(100, key[0][0], message)
         signature = elgamal_sign(digest, key)
