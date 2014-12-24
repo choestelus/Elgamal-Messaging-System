@@ -28,10 +28,8 @@ def receiver_thread(arg1, stop_event):
                     print receiver_key, "receiver_key"
                     continue
 
-                #print decrypt_string(pickle.loads(msg), key)
                 in_dict = pickle.loads(msg)
-
-                print "<- in_dict"
+                #print in_dict "<- in_dict"
                 if 'c' in in_dict:
                     plaintext = decrypt_string(in_dict['c'], key)
                     print "receive", plaintext
@@ -42,7 +40,7 @@ def receiver_thread(arg1, stop_event):
                     frecv = BitStream(in_dict['f'])
                     sys.stdout.write(">")
                     sys.stdout.flush()
-                    f = open("file.out", "wb")
+                    f = open(in_dict['fname'], "wb")
                     frecv.tofile(f)
                     f.close()
 
@@ -51,7 +49,7 @@ def receiver_thread(arg1, stop_event):
                     frecv = BitStream(decrypt(in_dict['fc'], key))
                     sys.stdout.write(">")
                     sys.stdout.flush()
-                    f = open("file.out", "wb")
+                    f = open(in_dict['fname'], "wb")
                     frecv.tofile(f)
                     f.close()
 
@@ -131,6 +129,7 @@ if __name__ == "__main__":
                 digest = AHash(int(k), key[0][0], file_send)
                 message['s'] = elgamal_sign(digest, key)
 
+            message['fname'] = input
             sending_str = pickle.dumps(message, -1)
 
         #for normal message
