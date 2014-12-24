@@ -17,8 +17,9 @@ def receiver_thread(arg1, stop_event):
         if socks:
             if socks.get(socket) == zmq.POLLIN:
                 msg = socket.recv(zmq.NOBLOCK)
-                print "receive: ", msg ,"\n>"
-                socket.send("Server've received message")
+                print "receive: ", msg
+                sys.stdout.write(">")
+                sys.stdout.flush()
 
 if __name__ == "__main__":
     t_stop = threading.Event()
