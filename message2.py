@@ -81,7 +81,7 @@ if __name__ == "__main__":
     context = zmq.Context()
     socket = context.socket(zmq.PAIR)
     socket.setsockopt(zmq.LINGER, 0)
-    socket.connect("tcp://localhost:%s" % port)
+    socket.connect("tcp://161.246.5.28:%s" % port)
 
     #key generation
     n, k = sys.argv[1:]

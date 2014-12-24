@@ -59,7 +59,7 @@ def receiver_thread(arg1, stop_event):
                     print "receive", plaintext 
 
                 if 's' in in_dict:
-                    if 'f' in in_dict:
+                    if 'f' in in_dict or 'fc' in in_dict:
                         digest = AHash(int(k), receiver_key[0], BitStream(frecv))
                     else:
                         digest = hash_string(int(k), receiver_key[0], plaintext)
