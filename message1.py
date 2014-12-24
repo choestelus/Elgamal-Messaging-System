@@ -103,7 +103,7 @@ if __name__ == "__main__":
         message = {} 
 
         try:
-            command = re.search('^\$.*\S*\s', input).group(0)[:-1]
+            command = re.search('^\$.\S*\s', input).group(0)[:-1]
             input = input.split(" ", 1)[1]
         except AttributeError:
             command = ""
