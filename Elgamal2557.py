@@ -105,17 +105,14 @@ def encrypt(bstream, pub_key):
     #if bstream.len % block_size != 0:
     #    padding_size = block_size - bstream.len%block_size
     #    bstream.append('0b' + '0'*(padding_size))
-    print "before random"
     #reset bitstream position
     bstream.pos = 0
     while True:
         k = random.SystemRandom().randint(1, p-1)
         if egcd(k,p-1)[0] == 1:
             break
-    print "post random"
     #have to add padding to plaintext
 
-    print "pre encrypt"
     #trying to improve execution speed
     #a = mod_exp(g, k, p)
     while(bstream.pos < bstream.len):
@@ -130,14 +127,11 @@ def encrypt(bstream, pub_key):
         a = mod_exp(g, k, p)
         b = (mod_exp(y,k, p)*x) % p
         ciphertext.append((a,b))
-    print ""
-    print "post encrypt"
 
     return ciphertext
 
 def decrypt(ciphertext, key):
     bstream = BitStream()
-    print "pre decrypt"
 
     p, g, y = key[0]
     u = key[1]
@@ -153,8 +147,6 @@ def decrypt(ciphertext, key):
         x = (block[1] * inv_a_pow_u) % p
         block_size = math.floor(math.log(p,2))
         bstream.append('0b' + bin(x)[2:].zfill(int(block_size)))
-    print ""
-    print "post decrypt"
 
     return bstream.read(ciphertext[0])
 
