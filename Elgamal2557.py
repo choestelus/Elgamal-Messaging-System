@@ -6,13 +6,21 @@ import random
 import math
 from bitstring import BitArray, BitStream, Bits
 
+def mod_exp(x,n,m):
+    result=1
+    for bit in reversed(bits_of_n(n)):
+        result = result * result % m
+        if bit == 1:
+            result = result * x % m
+    return result
+
 def isSet(total_num):
     return len(total_num) == len(set(total_num))
 
 def isGenerator(generator_num, mod_num):
     modulus_list = []
     for i in range(1, mod_num):
-        t = pow(generator_num, i, mod_num)
+        t = mod_exp(generator_num, i, mod_num)
         modulus_list.append(t)
     return isSet(modulus_list)
 
@@ -49,14 +57,6 @@ def bits_of_n(n):
 
     return bits
 
-def mod_exp(x,n,m):
-    result=1
-    for bit in reversed(bits_of_n(n)):
-        result = result * result % m
-        if bit == 1:
-            result = result * x % m
-    return result
-
 def getRandomBits(n):
     #n = int(binascii.hexlify(os.urandom(n)), 16)
     return random.SystemRandom().getrandbits(n)
@@ -68,7 +68,7 @@ def lehmannTest(test_number, test_count):
     """docstring for lehmannTest"""
     for i in range(test_count):
         a = getRandRange(1, test_number - 1)
-        x = pow(a, (test_number - 1)//2, test_number)
+        x = mod_exp(a, (test_number - 1)//2, test_number)
         if not (x == 1 or x == test_number - 1):
             return False
     else:
